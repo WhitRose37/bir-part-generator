@@ -1,0 +1,172 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/**
+ * ==== ของเดิม (คงไว้) ====
+ */
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  passwordHash  String
+  name          String?
+  avatar        String?
+  role          String    @default("USER")  // USER, ADMIN, OWNER
+  status        String    @default("ACTIVE") // ACTIVE, INACTIVE
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions     Session[]
+  favorites    SavedPartFavorite[]
+
+  @@index([role])
+  @@index([status])
+}
+
+model Session {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userAgent String?
+  ip        String?
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@index([userId])
+  @@index([token])
+}
+
+/**
+ * ==== ตารางข้อมูลชิ้นส่วน ====
+ */
+model SavedPartGlobal {
+  id          String  @id @default(cuid())
+  // ข้อมูลหลัก
+  partNumber  String  @unique
+  projectName String?
+  productName String?
+
+  // ชื่อทั่วไป / หน่วยนับ
+  commonNameEn String?
+  commonNameTh String?
+  uom          String?
+
+  // คุณลักษณะ / ความจุ / ปริมาณ
+  characteristicsOfMaterialEn  String?
+  characteristicsOfMaterialTh  String?
+  estimatedCapacityMachineYear String?
+  quantityToUse                String?
+
+  // ข้อความยาว (ไทย/อังกฤษ)
+  functionEn                   String?
+  functionTh                   String?
+  whereUsedEn                  String?
+  whereUsedTh                  String?
+  longTh                       String?
+  longEn                       String?
+
+  // ข้อมูลการค้า
+  eccn String?
+  hts  String?
+  coo  String?
+
+  // ข้อมูลเพิ่มเติม
+  tagsJson    Json? // แท็ก[]
+  imagesJson  Json? // รูปภาพ[]
+  sourcesJson Json? // {ชื่อแหล่งข้อมูล,ลิงก์}[]
+
+  // ข้อมูลการบันทึก
+  createdById   String?
+  createdByName String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // ความสัมพันธ์: ผู้ใช้ที่บันทึกชิ้นส่วนนี้ไว้
+  favoritedBy   SavedPartFavorite[]
+
+  @@index([updatedAt])
+  @@index([partNumber])
+}
+
+/**
+ * ==== ตารางรายการโปรด ====
+ * เชื่อมความสัมพันธ์ระหว่างผู้ใช้กับชิ้นส่วน
+ * - ป้องกันการบันทึกซ้ำด้วย @@unique([userId, partId])
+ * - ลบอัตโนมัติเมื่อลบผู้ใช้หรือชิ้นส่วน (Cascade)
+ */
+model SavedPartFavorite {
+  id         String           @id @default(uuid())
+  userId     String
+  glossaryId String?
+  globalId   String?
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  glossary   Glossary?        @relation(fields: [glossaryId], references: [id], onDelete: Cascade)
+  global     SavedPartGlobal? @relation(fields: [globalId], references: [id], onDelete: Cascade)
+  createdAt  DateTime         @default(now())
+
+  @@unique([userId, glossaryId])
+  @@unique([userId, globalId])
+  @@index([userId])
+  @@index([glossaryId])
+  @@index([globalId])
+}
+
+model Glossary {
+  id        String   @id @default(uuid())
+  // คำศัพท์ (ไทย/อังกฤษ)
+  termTh    String
+  termEn    String
+  // ข้อความยาว (ไทย/อังกฤษ)
+  longTh    String?
+  longEn    String?
+  // ข้อมูลหลัก
+  partNumber  String  @unique
+  projectName String?
+  productName String?
+
+  // ชื่อทั่วไป / หน่วยนับ
+  commonNameEn String?
+  commonNameTh String?
+  uom          String?
+
+  // คุณลักษณะ / ความจุ / ปริมาณ
+  characteristicsOfMaterialEn  String?
+  characteristicsOfMaterialTh  String?
+  estimatedCapacityMachineYear String?
+  quantityToUse                String?
+
+  // ✅ เพิ่มเฉพาะ 4 ฟิลด์นี้ (ไม่ซ้ำ)
+  functionEn                   String?
+  functionTh                   String?
+  whereUsedEn                  String?
+  whereUsedTh                  String?
+
+  // ข้อมูลการค้า
+  eccn String?
+  hts  String?
+  coo  String?
+
+  // ข้อมูลเพิ่มเติม
+  tagsJson    Json? // แท็ก[]
+  imagesJson  Json? // รูปภาพ[]
+  sourcesJson Json? // {ชื่อแหล่งข้อมูล,ลิงก์}[]
+
+  // ข้อมูลการบันทึก
+  createdById   String?
+  createdByName String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // ความสัมพันธ์: ผู้ใช้ที่บันทึกชิ้นส่วนนี้ไว้
+  favoritedBy   SavedPartFavorite[]
+
+  @@index([updatedAt])
+  @@index([partNumber])
+}
