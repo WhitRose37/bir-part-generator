@@ -5,7 +5,7 @@ import { getCurrentUser } from "@/lib/auth";
 export const runtime = "nodejs";
 
 export async function POST(req: Request) {
-  const user = await getCurrentUser(); // ถ้ายังไม่ล็อกอิน จะเป็น null ได้
+  const user = await getCurrentUser();
   const body = await req.json();
   const part = body?.part;
 
@@ -16,14 +16,44 @@ export async function POST(req: Request) {
   const saved = await prisma.savedPartGlobal.upsert({
     where: { partNumber: String(part.part_number) },
     update: {
-      data: part,
-      createdById: user?.id ?? null,       // เก็บคนล่าสุดที่อัปเดตไว้ด้วยก็ได้
+      productName: part.product_name || null,
+      commonNameEn: part.common_name_en || null,
+      commonNameTh: part.common_name_th || null,
+      uom: part.uom || null,
+      characteristicsOfMaterialEn: part.characteristics_of_material_en || null,
+      characteristicsOfMaterialTh: part.characteristics_of_material_th || null,
+      functionEn: part.function_en || null,
+      functionTh: part.function_th || null,
+      whereUsedEn: part.where_used_en || null,
+      whereUsedTh: part.where_used_th || null,
+      eccn: part.eccn || null,
+      hts: part.hts || null,
+      coo: part.coo || null,
+      tagsJson: Array.isArray(part.tags) ? part.tags : null,
+      imagesJson: Array.isArray(part.images) ? part.images : null,
+      sourcesJson: Array.isArray(part.sources) ? part.sources : null,
+      createdById: user?.id ?? null,
       createdByName: user?.name ?? null,
       updatedAt: new Date(),
     },
     create: {
       partNumber: String(part.part_number),
-      data: part,
+      productName: part.product_name || null,
+      commonNameEn: part.common_name_en || null,
+      commonNameTh: part.common_name_th || null,
+      uom: part.uom || null,
+      characteristicsOfMaterialEn: part.characteristics_of_material_en || null,
+      characteristicsOfMaterialTh: part.characteristics_of_material_th || null,
+      functionEn: part.function_en || null,
+      functionTh: part.function_th || null,
+      whereUsedEn: part.where_used_en || null,
+      whereUsedTh: part.where_used_th || null,
+      eccn: part.eccn || null,
+      hts: part.hts || null,
+      coo: part.coo || null,
+      tagsJson: Array.isArray(part.tags) ? part.tags : null,
+      imagesJson: Array.isArray(part.images) ? part.images : null,
+      sourcesJson: Array.isArray(part.sources) ? part.sources : null,
       createdById: user?.id ?? null,
       createdByName: user?.name ?? null,
     },
