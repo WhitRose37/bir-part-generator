@@ -8,33 +8,42 @@ export const runtime = "nodejs";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const email = body?.email?.trim();
-    const password = body?.password;
+    const { email, password, name } = body;
 
-    if (!email || !password) {
+    if (!email?.trim() || !password || !name?.trim()) {
       return NextResponse.json(
-        { error: "Email and password required" },
+        { error: "Email, password, and name are required" },
         { status: 400 }
       );
     }
 
-    const user = await prisma.user.findUnique({ where: { email } });
-
-    if (!user) {
+    if (password.length < 6) {
       return NextResponse.json(
-        { error: "Invalid credentials" },
-        { status: 401 }
+        { error: "Password must be at least 6 characters" },
+        { status: 400 }
       );
     }
 
-    const isValidPassword = await bcrypt.compare(password, user.passwordHash);
-
-    if (!isValidPassword) {
+    const existingUser = await prisma.user.findUnique({ 
+      where: { email: email.trim() } 
+    });
+    
+    if (existingUser) {
       return NextResponse.json(
-        { error: "Invalid credentials" },
-        { status: 401 }
+        { error: "Email already registered" },
+        { status: 409 }
       );
     }
+
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    const user = await prisma.user.create({
+      data: {
+        email: email.trim(),
+        passwordHash: hashedPassword,
+        name: name.trim(),
+      },
+    });
 
     const session = await prisma.session.create({
       data: {
@@ -59,7 +68,7 @@ export async function POST(req: Request) {
       user: { id: user.id, email: user.email, name: user.name } 
     });
   } catch (e: any) {
-    console.error("Login error:", e);
+    console.error("Register error:", e);
     return NextResponse.json({ error: e?.message }, { status: 500 });
   }
 }
