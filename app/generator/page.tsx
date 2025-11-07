@@ -429,7 +429,7 @@ export default function GeneratorPage() {
                   </button>
 
                   <div style={{ display: "flex", gap: 8, justifyContent: "center", flex: 1 }}>
-                    {images.map((_, i) => (
+                    {images.map((_: string, i: number) => (
                       <button
                         key={i}
                         onClick={() => setImageIndex(i)}
