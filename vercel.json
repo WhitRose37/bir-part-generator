@@ -1,15 +1,6 @@
 {
   "version": 2,
   "buildCommand": "prisma generate && npm run build",
-  "devCommand": "npm run dev",
-  "installCommand": "npm install",
   "framework": "nextjs",
-  "regions": ["sin1"],
-  "env": {
-    "DATABASE_URL": "@database_url",
-    "PERPLEXITY_API_KEY": "@perplexity_api_key",
-    "GOOGLE_SEARCH_API_KEY": "@google_search_api_key",
-    "GOOGLE_SEARCH_ENGINE_ID": "@google_search_engine_id",
-    "NEXTAUTH_SECRET": "@nextauth_secret"
-  }
+  "regions": ["sin1"]
 }
