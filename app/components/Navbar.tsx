@@ -2,43 +2,41 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
-
-type User = {
-  id: string;
-  name: string | null;
-  email: string;
-  avatar?: string;
-  role: string;
-};
+import { usePathname, useRouter } from "next/navigation";
 
 export default function Navbar() {
-  const router = useRouter();
   const pathname = usePathname();
-  const [user, setUser] = useState<User | null>(null);
+  const router = useRouter();
+  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
 
   useEffect(() => {
-    fetchUser();
+    setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (mounted) {
+      fetchUser();
+    }
+  }, [mounted]);
 
   async function fetchUser() {
     try {
       const res = await fetch("/api/me", {
-        cache: "no-store",
         credentials: "include",
+        cache: "no-store",
       });
-
       if (res.ok) {
         const data = await res.json();
-        // ✅ 確保 data 是物件，不是陣列或其他型別
-        if (data && typeof data === "object" && !Array.isArray(data)) {
-          setUser(data as User);
-        }
+        setUser(data);
+      } else {
+        setUser(null);
       }
     } catch (e) {
-      console.error("Error fetching user:", e);
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -50,150 +48,148 @@ export default function Navbar() {
         method: "POST",
         credentials: "include",
       });
+
       setUser(null);
-      setDropdownOpen(false);
-      router.push("/login");
+      window.location.href = "/";
     } catch (e) {
       console.error("Logout error:", e);
     }
   }
 
-  const isActive = (path: string) => pathname === path;
+  if (!mounted) return null;
 
   return (
     <nav className="nav">
       <div className="nav__inner">
-        {/* Logo & Brand */}
         <Link href="/" className="brand">
-          <div style={{ fontSize: "24px" }}>🏭</div>
-          <span className="brand__name">BIR Parts</span>
+          <span className="brand__name">🚀 BIR Parts</span>
         </Link>
 
-        {/* Nav Links */}
-        <div className="nav__links">
-          <Link
-            href="/"
-            className={`nav__link ${isActive("/") ? "nav__link--active" : ""}`}
-          >
-            🏠 Home
-          </Link>
-
-          <Link
-            href="/generator"
-            className={`nav__link ${isActive("/generator") ? "nav__link--active" : ""}`}
-          >
-            🔍 Generator
-          </Link>
-
-          <Link
-            href="/saved-global"
-            className={`nav__link ${isActive("/saved-global") ? "nav__link--active" : ""}`}
-          >
-            🌐 Global
-          </Link>
-
-          {/* Auth Section */}
-          {loading ? (
-            <span className="nav__link" style={{ opacity: 0.6 }}>
-              ⏳ Loading...
-            </span>
-          ) : user ? (
-            <div className="nav__user-menu">
-              <button
-                className="nav__user-button"
-                onClick={() => setDropdownOpen(!dropdownOpen)}
+        {/* Desktop Links */}
+        <div className="nav__links" style={{ display: loading ? "none" : "flex" }}>
+          {user ? (
+            <>
+              <Link
+                href="/generator"
+                className={`nav__link ${pathname === "/generator" ? "nav__link--active" : ""}`}
               >
-                {user.avatar && (
-                  <img
-                    src={user.avatar}
-                    alt={user.name || ""}
-                    style={{
-                      width: "20px",
-                      height: "20px",
-                      borderRadius: "50%",
-                    }}
-                  />
-                )}
-                {!user.avatar && (
+                🔍 Generator
+              </Link>
+
+              <Link
+                href="/saved-global"
+                className={`nav__link ${pathname === "/saved-global" ? "nav__link--active" : ""}`}
+              >
+                🌐 Global Parts
+              </Link>
+
+              {/* User Dropdown Menu */}
+              <div 
+                className="nav__user-menu"
+                onMouseEnter={() => setShowTooltip(true)}
+                onMouseLeave={() => setShowTooltip(false)}
+              >
+                <button
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="nav__user-button"
+                >
                   <div className="nav__avatar">
-                    {user.name?.charAt(0).toUpperCase() || "U"}
+                    {user.avatar ? (
+                      <img
+                        src={user.avatar}
+                        alt={user.name}
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                        }}
+                      />
+                    ) : (
+                      user.name?.charAt(0).toUpperCase() || "U"
+                    )}
+                  </div>
+                  <span className="nav__user-name">{user.name}</span>
+                  <span className={`nav__dropdown-icon ${dropdownOpen ? "open" : ""}`}>
+                    ▼
+                  </span>
+                </button>
+
+                {/* Tooltip */}
+                {showTooltip && !dropdownOpen && (
+                  <div className="nav__tooltip">
+                    {user.name}
                   </div>
                 )}
-                <span className="nav__user-name">
-                  {user.name || user.email}
-                </span>
-                <span
-                  className={`nav__dropdown-icon ${dropdownOpen ? "open" : ""}`}
-                >
-                  ▼
-                </span>
-              </button>
 
-              {/* Dropdown Menu */}
-              {dropdownOpen && (
-                <div className="nav__dropdown">
-                  <Link
-                    href="/profile"
-                    className="nav__dropdown-item"
-                    onClick={() => setDropdownOpen(false)}
-                  >
-                    👤 Profile
-                  </Link>
-
-                  {user.role === "ADMIN" && (
+                {dropdownOpen && (
+                  <div className="nav__dropdown">
                     <Link
-                      href="/admin"
+                      href="/profile"
                       className="nav__dropdown-item"
                       onClick={() => setDropdownOpen(false)}
                     >
-                      ⚙️ Admin Panel
+                      👤 Profile
                     </Link>
-                  )}
 
-                  {user.role === "ADMIN" && (
-                    <Link
-                      href="/dashboard"
-                      className="nav__dropdown-item"
-                      onClick={() => setDropdownOpen(false)}
+                    {/* Admin/Owner Menu */}
+                    {(user.role === "ADMIN" || user.role === "OWNER") && (
+                      <>
+                        <div className="nav__dropdown-divider" />
+                        <Link
+                          href="/dashboard"
+                          className="nav__dropdown-item"
+                          onClick={() => setDropdownOpen(false)}
+                        >
+                          📊 Dashboard
+                        </Link>
+                        <Link
+                          href="/admin"
+                          className="nav__dropdown-item"
+                          onClick={() => setDropdownOpen(false)}
+                        >
+                          {user.role === "OWNER" ? "👑" : "🔧"} Admin
+                        </Link>
+                      </>
+                    )}
+
+                    <div className="nav__dropdown-divider" />
+                    <button
+                      onClick={() => {
+                        setDropdownOpen(false);
+                        handleLogout();
+                      }}
+                      className="nav__dropdown-item nav__dropdown-item--logout"
                     >
-                      📊 Dashboard
-                    </Link>
-                  )}
-
-                  <Link
-                    href="/my-catalog"
-                    className="nav__dropdown-item"
-                    onClick={() => setDropdownOpen(false)}
-                  >
-                    ❤️ My Catalog
-                  </Link>
-
-                  <div className="nav__dropdown-divider" />
-
-                  <button
-                    className="nav__dropdown-item nav__dropdown-item--logout"
-                    onClick={handleLogout}
-                  >
-                    🚪 Logout
-                  </button>
-                </div>
-              )}
-            </div>
+                      🚪 Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            </>
           ) : (
             <>
-              <Link href="/login" className="nav__link">
-                🔐 Login
-              </Link>
               <Link
-                href="/register"
+                href="/login"
                 className="nav__link nav__link--primary"
               >
-                ✍️ Register
+                🔐 Login
               </Link>
             </>
           )}
         </div>
       </div>
+
+      {/* Click outside to close dropdown */}
+      {dropdownOpen && (
+        <div
+          onClick={() => setDropdownOpen(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 999,
+          }}
+        />
+      )}
     </nav>
   );
 }

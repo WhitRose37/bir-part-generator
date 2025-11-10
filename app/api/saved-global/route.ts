@@ -29,10 +29,12 @@ export async function POST(req: Request) {
       characteristics_of_material_th,
       estimated_capacity_machine_year,
       quantity_to_use,
-      function_en,      // ✅ เพิ่มมา
-      function_th,      // ✅ เพิ่มมา
-      where_used_en,    // ✅ เพิ่มมา
-      where_used_th,    // ✅ เพิ่มมา
+      function_en,
+      function_th,
+      where_used_en,
+      where_used_th,
+      long_en,  // ✅ เพิ่ม
+      long_th,  // ✅ เพิ่ม
       eccn,
       hts,
       coo,
@@ -60,11 +62,12 @@ export async function POST(req: Request) {
         characteristicsOfMaterialTh: characteristics_of_material_th,
         estimatedCapacityMachineYear: estimated_capacity_machine_year,
         quantityToUse: quantity_to_use,
-        // ✅ เพิ่มฟิลด์ใหม่
         functionEn: function_en,
         functionTh: function_th,
         whereUsedEn: where_used_en,
         whereUsedTh: where_used_th,
+        longEn: long_en,  // ✅ เพิ่ม
+        longTh: long_th,  // ✅ เพิ่ม
         eccn,
         hts,
         coo,
@@ -86,11 +89,12 @@ export async function POST(req: Request) {
         characteristicsOfMaterialTh: characteristics_of_material_th,
         estimatedCapacityMachineYear: estimated_capacity_machine_year,
         quantityToUse: quantity_to_use,
-        // ✅ เพิ่มฟิลด์ใหม่
         functionEn: function_en,
         functionTh: function_th,
         whereUsedEn: where_used_en,
         whereUsedTh: where_used_th,
+        longEn: long_en,  // ✅ เพิ่ม
+        longTh: long_th,  // ✅ เพิ่ม
         eccn,
         hts,
         coo,
