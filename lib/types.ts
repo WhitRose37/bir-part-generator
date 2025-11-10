@@ -13,6 +13,12 @@ export type PartOut = {
   estimated_capacity_machine_year?: string; // Estimated Capacity/Machine/Year
   quantity_to_use?: string;                 // Quantity To Use
 
+  // ✅ เพิ่มฟิลด์ที่หายไป
+  function_en?: string;                    // Function (EN)
+  function_th?: string;                    // Function (TH)
+  where_used_en?: string;                  // Where Used (EN)
+  where_used_th?: string;                  // Where Used (TH)
+
   long_th?: string; // Function/Where/Char/How/Purpose (TH)
   long_en?: string; // Function/Where/Char/How/Purpose (EN)
 
