@@ -2,13 +2,17 @@
 
 generator client {
   provider = "prisma-client-js"
-  // ✅ CRITICAL: Add binary targets for Vercel (AWS Lambda)
   binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
-  provider = "postgresql"
+  // ✅ Use sqlite for local development
+  provider = "sqlite"
   url      = env("DATABASE_URL")
+  
+  // ✅ For production (Vercel), change to:
+  // provider = "postgresql"
+  // url      = env("DATABASE_URL")
 }
 
 /**
