@@ -77,7 +77,8 @@ export async function googleSearchImage(query: string, limit = 6) {
   }));
 
   console.log(`[googleSearchImage] ✅ Found ${results.length} images`);
-  results.slice(0, 3).forEach((r, i) => {
+  // ✅ Add type annotation for forEach parameter
+  results.slice(0, 3).forEach((r: { url: string; thumbnail?: string; context?: string }, i: number) => {
     console.log(`  ${i + 1}. ${r.url.substring(0, 80)}...`);
   });
 
