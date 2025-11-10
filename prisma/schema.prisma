@@ -2,18 +2,12 @@
 
 generator client {
   provider = "prisma-client-js"
-  // ✅ ต้องมีบรรทัดนี้
   binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_DATABASE_URL")
-  
-  // ✅ Local dev: Use SQLite
-  // provider = "sqlite"
-  // url      = env("DATABASE_URL")
 }
 
 /**
