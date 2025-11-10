@@ -21,9 +21,16 @@ export async function createSession(
   meta?: { userAgent?: string; ip?: string }
 ) {
   const token = crypto.randomBytes(32).toString("hex");
+  const expiresAt = new Date(Date.now() + SESSION_MAX_AGE * 1000); // ✅ เพิ่ม
 
   await prisma.session.create({
-    data: { token, userId, userAgent: meta?.userAgent, ip: meta?.ip },
+    data: { 
+      token, 
+      userId, 
+      expiresAt, // ✅ เพิ่ม
+      userAgent: meta?.userAgent, 
+      ip: meta?.ip 
+    },
   });
 
   // 👇 Next 16: ต้อง await cookies() ก่อนใช้ .set()
