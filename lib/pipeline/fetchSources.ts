@@ -1,5 +1,5 @@
 // lib/pipeline/fetchSources.ts
-import { fetchAndExtractText } from "@/lib/fetchPages";
+import { smartSearch } from "@/lib/searchRouter";
 
 export type SourceText = { url: string; name: string; text: string; priority?: number };
 
@@ -9,28 +9,36 @@ export async function fetchTopSources(urls: string[], limit = 5): Promise<Source
   
   for (const u of picked) {
     try {
-      // ✅ ดึง text จาก URL
-      const { text, title } = await fetchAndExtractText(u);
+      // ✅ fetchAndExtractText returns array of search results
+      // We'll use smartSearch directly instead
+      const { results } = await smartSearch(u, "google");
       
-      // ✅ ลำดับความสำคัญ: datasheet > manual > product page
+      if (!results || results.length === 0) continue;
+      
+      // Take first result
+      const first = results[0];
+      
+      // ✅ Priority: datasheet > manual > product page
       const priority = 
         u.includes("datasheet") ? 1000 :
         u.includes("manual") ? 900 :
         u.includes("product") ? 800 : 0;
       
-      if (text && text.length > 300) {
+      if (first.snippet && first.snippet.length > 300) {
         out.push({ 
-          url: u, 
-          name: title || new URL(u).hostname,
-          text,
+          url: first.url || u, 
+          name: first.title || new URL(u).hostname,
+          text: first.snippet,
           priority 
-        } as any);
+        });
       }
-    } catch {}
+    } catch (e) {
+      console.warn(`[fetchTopSources] Failed to fetch ${u}:`, e);
+    }
   }
   
-  // เรียง datasheet ขึ้นมาก่อน
-  out.sort((a, b) => (b as any).priority - (a as any).priority);
+  // Sort by priority (datasheet first)
+  out.sort((a, b) => (b.priority || 0) - (a.priority || 0));
   return out;
 }
 
