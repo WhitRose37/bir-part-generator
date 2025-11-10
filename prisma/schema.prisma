@@ -2,12 +2,12 @@
 
 generator client {
   provider = "prisma-client-js"
-  // ✅ เพิ่ม binaryTargets สำหรับ Vercel
+  // ✅ CRITICAL: Add binary targets for Vercel (AWS Lambda)
   binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
-  provider = "postgresql"  // ✅ เปลี่ยนเป็น postgresql สำหรับ production
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
