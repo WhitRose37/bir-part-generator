@@ -15,7 +15,7 @@ export async function generatePartData(
   partNumber: string,
   options: {
     strict?: boolean;
-    searchEngine?: string;
+    searchEngine?: "auto" | "perplexity" | "google"; // ✅ แก้ไข type ให้ชัดเจน
     withImage?: boolean;
   } = {}
 ): Promise<any> {
@@ -29,7 +29,10 @@ export async function generatePartData(
     let sources: any[] = [];
     try {
       console.log(`[generatePartData] 🌐 Searching sources...`);
-      sources = await fetchAndExtractText(partNumber, { engine: searchEngine });
+      // ✅ Cast to correct type
+      sources = await fetchAndExtractText(partNumber, { 
+        engine: searchEngine as "auto" | "perplexity" | "google" 
+      });
       
       if (sources && sources.length > 0) {
         console.log(`[generatePartData] ✅ Found ${sources.length} sources`);

@@ -5,7 +5,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"  // ✅ เปลี่ยนเป็น sqlite
+  provider = "postgresql"  // ✅ เปลี่ยนเป็น postgresql สำหรับ production
   url      = env("DATABASE_URL")
 }
 

@@ -51,8 +51,8 @@ export async function PUT(
       functionTh,
       whereUsedEn,
       whereUsedTh,
-      characteristicsEn,
-      characteristicsTh,
+      characteristicsOfMaterialEn,
+      characteristicsOfMaterialTh,
       uom,
     } = body;
 
@@ -65,8 +65,8 @@ export async function PUT(
         functionTh: functionTh || undefined,
         whereUsedEn: whereUsedEn || undefined,
         whereUsedTh: whereUsedTh || undefined,
-        characteristicsEn: characteristicsEn || undefined,
-        characteristicsTh: characteristicsTh || undefined,
+        characteristicsOfMaterialEn: characteristicsOfMaterialEn || undefined,
+        characteristicsOfMaterialTh: characteristicsOfMaterialTh || undefined,
         uom: uom || undefined,
       },
     });

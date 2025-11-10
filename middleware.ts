@@ -3,10 +3,9 @@ import { NextResponse, NextRequest } from "next/server";
 // ✅ Route ที่ต้อง login
 const PROTECTED = [
   "/generator",
-  "/saved-global",      // ✅ เก็บ
-  "/profile",           // ✅ เก็บ
-  "/api/generate",
-  "/api/saved-global",
+  "/my-catalog",      // ✅ เก็บ
+  "/dashboard",      // ✅ เก็บ
+  "/admin",          // ✅ เก็บ
 ];
 
 // ✅ Route ที่ปล่อยผ่าน (ไม่ต้อง login)

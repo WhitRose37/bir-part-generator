@@ -2,12 +2,30 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 type Favorite = {
   id: string;
-  glossary?: { id: string; partNumber: string; commonNameEn?: string; commonNameTh?: string };
-  global?: { id: string; partNumber: string; commonNameEn?: string; commonNameTh?: string };
+  glossaryId?: string | null;
+  globalId?: string | null;
+  glossary?: {
+    partNumber: string;
+    commonNameEn?: string;
+    commonNameTh?: string;
+  } | null;
+  global?: {
+    partNumber: string;
+    commonNameEn?: string;
+    commonNameTh?: string;
+  } | null;
   createdAt: string;
+};
+
+// ✅ Add proper return type
+type PartInfo = {
+  partNumber: string;
+  commonNameEn?: string;
+  commonNameTh?: string;
 };
 
 function showToast(msg: string, type: "success" | "error" = "success") {
@@ -22,9 +40,12 @@ function showToast(msg: string, type: "success" | "error" = "success") {
 }
 
 export default function MyCatalogPage() {
+  const router = useRouter();
   const [favorites, setFavorites] = useState<Favorite[]>([]);
   const [loading, setLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [deleting, setDeleting] = useState<string | null>(null);
@@ -97,6 +118,40 @@ export default function MyCatalogPage() {
     }
   }
 
+  // ✅ Fix: Add proper return type annotation
+  function getPartInfo(fav: Favorite): PartInfo {
+    if (fav.glossary) {
+      return {
+        partNumber: fav.glossary.partNumber,
+        commonNameEn: fav.glossary.commonNameEn,
+        commonNameTh: fav.glossary.commonNameTh,
+      };
+    }
+    if (fav.global) {
+      return {
+        partNumber: fav.global.partNumber,
+        commonNameEn: fav.global.commonNameEn,
+        commonNameTh: fav.global.commonNameTh,
+      };
+    }
+    return {
+      partNumber: "Unknown",
+      commonNameEn: "Unknown",
+      commonNameTh: "ไม่ทราบ",
+    };
+  }
+
+  const filteredFavorites = favorites.filter((fav) => {
+    if (!searchQuery.trim()) return true;
+    const part = getPartInfo(fav);
+    const query = searchQuery.toLowerCase();
+    return (
+      part.partNumber.toLowerCase().includes(query) ||
+      part.commonNameEn?.toLowerCase().includes(query) ||
+      part.commonNameTh?.toLowerCase().includes(query)
+    );
+  });
+
   if (!mounted || loading) {
     return (
       <div className="container" style={{ marginTop: 20, marginBottom: 40 }}>
@@ -107,11 +162,17 @@ export default function MyCatalogPage() {
     );
   }
 
-  const pages = Math.ceil(total / 10);
+  if (error) {
+    return (
+      <div className="container" style={{ marginTop: 20, marginBottom: 40 }}>
+        <div className="card glass">
+          <p style={{ color: "#e74c3c" }}>❌ {error}</p>
+        </div>
+      </div>
+    );
+  }
 
-  const getPartInfo = (fav: Favorite) => {
-    return fav.global || fav.glossary || {};
-  };
+  const pages = Math.ceil(total / 10);
 
   return (
     <div className="container" style={{ marginTop: 20, marginBottom: 40 }}>
@@ -123,8 +184,27 @@ export default function MyCatalogPage() {
         </p>
       </div>
 
+      {/* Search Bar */}
+      <div className="card glass" style={{ marginBottom: 20 }}>
+        <input
+          type="text"
+          placeholder="🔎 Search by part number or name..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "12px",
+            background: "rgba(0, 0, 0, 0.2)",
+            border: "1px solid rgba(155, 89, 182, 0.3)",
+            borderRadius: 6,
+            color: "white",
+            fontSize: 13,
+          }}
+        />
+      </div>
+
       {/* Content */}
-      {favorites.length === 0 ? (
+      {filteredFavorites.length === 0 ? (
         <div className="card glass">
           <p style={{ color: "rgba(255, 255, 255, 0.6)", textAlign: "center", padding: 20 }}>
             📭 No items in catalog yet
@@ -143,7 +223,7 @@ export default function MyCatalogPage() {
                 </tr>
               </thead>
               <tbody>
-                {favorites.map((fav, idx) => {
+                {filteredFavorites.map((fav, idx) => {
                   const part = getPartInfo(fav);
                   const partNumber = part.partNumber || "Unknown";
                   const partName = part.commonNameEn || partNumber;

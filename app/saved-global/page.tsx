@@ -106,7 +106,7 @@ export default function SavedGlobalPage() {
   const [draft, setDraft] = useState<Partial<Norm>>({});
   const [saving, setSaving] = useState(false);
 
-  function toast(msg: string, type: "success" | "error" = "success") {
+  function showToast(msg: string, type: "success" | "error" = "success") {
     const t = document.createElement("div");
     t.className = `toast toast--${type}`;
     t.textContent = msg;
@@ -189,12 +189,12 @@ export default function SavedGlobalPage() {
       });
       const j = await res.json();
       if (!res.ok) throw new Error(j?.error || res.statusText);
-      toast("✅ Updated");
+      showToast("✅ Updated");
       setEditMode(false);
       setView(null);
       load();
     } catch (e: any) {
-      toast(`❌ Update failed: ${e?.message || e}`, "error");
+      showToast(`❌ Update failed: ${e?.message || e}`, "error");
     } finally {
       setSaving(false);
     }
@@ -210,11 +210,11 @@ export default function SavedGlobalPage() {
       });
       const j = await res.json();
       if (!res.ok) throw new Error(j?.error || res.statusText);
-      toast("🗑 Deleted");
+      showToast("🗑 Deleted");
       setView(null);
       load();
     } catch (e: any) {
-      toast(`❌ Delete failed: ${e?.message || e}`, "error");
+      showToast(`❌ Delete failed: ${e?.message || e}`, "error");
     }
   }
 

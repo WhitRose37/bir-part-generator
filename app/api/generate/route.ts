@@ -65,7 +65,7 @@ export async function POST(req: Request) {
     console.log(`[generate] ✅ Generated successfully`);
     console.log(`[generate] 📸 Images: ${raw.images?.length || 0}`);
 
-    // ✅ Ensure response is valid and complete JSON
+    // ✅ Fix: Add type annotation for filter parameter
     const response = {
       part_number: String(raw.part_number || part_number),
       common_name_en: String(raw.common_name_en || part_number),
@@ -77,7 +77,7 @@ export async function POST(req: Request) {
       characteristics_of_material_en: String(raw.characteristics_of_material_en || ""),
       characteristics_of_material_th: String(raw.characteristics_of_material_th || ""),
       uom: String(raw.uom || ""),
-      images: Array.isArray(raw.images) ? raw.images.filter(u => typeof u === "string") : [],
+      images: Array.isArray(raw.images) ? raw.images.filter((u: any) => typeof u === "string") : [],
       tags: Array.isArray(raw.tags) ? raw.tags : [],
       sources: Array.isArray(raw.sources) ? raw.sources : [],
       source_confidence: String(raw.source_confidence || "low"),
