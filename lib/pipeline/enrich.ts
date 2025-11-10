@@ -1,4 +1,10 @@
-// lib/pipeline/enrich.ts
+/**
+ * ⚠️ FILE DEPRECATED - Enrich logic moved to summarize.ts
+ * 
+ * This file is kept for reference but not used in production.
+ * Use lib/pipeline/summarize.ts → summarizeStrict() instead
+ */
+
 import { perplexitySummarizeFromSources } from "@/lib/perplexity";
 import { coerceToJson } from "@/lib/utils/llm";
 import { resolvePerplexityOnlineModel } from "@/lib/perplexityModels";
@@ -32,6 +38,13 @@ function validateResultKeys(original: any, candidate: any): boolean {
     if (!(k in candidate)) return false;
   }
   return true;
+}
+
+export async function aiFillMissingFields(): Promise<never> {
+  throw new Error(
+    "❌ aiFillMissingFields is deprecated. Use summarizeStrict() instead. " +
+    "See: lib/pipeline/summarize.ts"
+  );
 }
 
 export async function aiFillMissingFields(part: any): Promise<Partial<typeof part>> {
@@ -86,59 +99,5 @@ Return ONLY valid JSON, no explanations.`;
   } catch (e) {
     console.error("[aiFillMissingFields] error:", e);
     return {};
-  }
-}
-
-export async function aiFillMissingFields(part: any) {
-  const inputJson = JSON.stringify(part, null, 2);
-
-  const prompt = `
-You are a technical AI that fills missing part data for manufacturing.
-
-Given this JSON of a part, fill in realistic values for any empty ("", null, or "Unknown") fields.
-Base your knowledge on the part name, standard specs, and general manufacturing practices.
-Keep the tone factual and concise (engineering-style).
-
-Return a valid JSON with the same keys.
-
-Example:
-Input: {"part_number":"BZX55C-5V6","common_name_en":"","uom":"","function_en":""}
-Output: {"part_number":"BZX55C-5V6","common_name_en":"Zener Diode 5.6V","uom":"pcs","function_en":"Voltage regulation component"}
-
-Input JSON:
-${inputJson}
-  `.trim();
-
-  try {
-    const raw = await runWithTimeout(
-      perplexitySummarizeFromSources({
-        prompt,
-        sources: [{ name: "ai_fill", url: "", text: "" }],
-      })
-    );
-
-    const safe = coerceToJson(raw);
-    if (!safe || typeof safe !== "string") {
-      console.warn("aiFillMissingFields: coerceToJson returned non-string, falling back");
-      return part;
-    }
-
-    let parsed: any;
-    try {
-      parsed = JSON.parse(safe);
-    } catch (parseErr) {
-      console.warn("aiFillMissingFields: JSON.parse failed, falling back", String(parseErr));
-      return part;
-    }
-
-    if (!validateResultKeys(part, parsed)) {
-      console.warn("aiFillMissingFields: validation failed, returning original part");
-      return part;
-    }
-
-    return parsed;
-  } catch (err: any) {
-    console.error("aiFillMissingFields error - returning original part:", err?.message ?? String(err));
-    return part;
   }
 }
