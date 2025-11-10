@@ -1,36 +1,51 @@
 import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcrypt'
 
 const prisma = new PrismaClient()
 
 async function main() {
-  // สร้าง User ตัวอย่าง
-  const user = await prisma.user.create({
-    data: {
+  console.log('🌱 Seeding database...')
+
+  // ✅ Hash password properly
+  const hashedPassword = await bcrypt.hash('admin123', 12)
+
+  // ✅ Create admin user with correct schema
+  const user = await prisma.user.upsert({
+    where: { email: 'admin@example.com' },
+    update: {},
+    create: {
       email: 'admin@example.com',
-      username: 'admin',
-      password: 'hashed_password_here', // ใช้ bcrypt hash ในโปรเจกต์จริง
+      passwordHash: hashedPassword,
+      name: 'Admin User',
       role: 'ADMIN',
+      status: 'ACTIVE',
     },
   })
 
-  console.log('Created user:', user)
+  console.log('✅ Created admin user:', user)
 
-  // สร้าง Glossary ตัวอย่าง
-  const glossary = await prisma.glossary.create({
-    data: {
+  // ✅ Create sample glossary entry
+  const glossary = await prisma.glossary.upsert({
+    where: { partNumber: 'SAMPLE-001' },
+    update: {},
+    create: {
       termTh: 'เครื่องยนต์',
       termEn: 'Engine',
       longTh: 'ส่วนประกอบหลักของรถยนต์',
       longEn: 'Main component of vehicle',
+      partNumber: 'SAMPLE-001',
+      commonNameEn: 'Engine',
+      commonNameTh: 'เครื่องยนต์',
     },
   })
 
-  console.log('Created glossary:', glossary)
+  console.log('✅ Created sample glossary:', glossary)
+  console.log('🎉 Seeding complete!')
 }
 
 main()
   .catch((e) => {
-    console.error(e)
+    console.error('❌ Seeding error:', e)
     process.exit(1)
   })
   .finally(async () => {
