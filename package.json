@@ -4,20 +4,19 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "npx prisma generate && next build",
     "start": "next start",
-    "lint": "eslint",
-    "postinstall": "prisma generate"
+    "postinstall": "npx prisma generate"
   },
   "dependencies": {
-    "@prisma/client": "^6.18.0",
+    "@prisma/client": "^6.19.0",
     "axios": "^1.13.0",
     "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "dotenv": "^17.2.3",
     "html-to-text": "^9.0.5",
     "next": "16.0.0",
-    "prisma": "^6.18.0",
+    "prisma": "^6.19.0",
     "react": "19.2.0",
     "react-dom": "19.2.0",
     "zod": "^3.22.4"

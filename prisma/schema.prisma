@@ -2,14 +2,14 @@
 
 generator client {
   provider = "prisma-client-js"
-  // ✅ CRITICAL: Add binary targets for Vercel deployment
+  // ✅ ต้องมีบรรทัดนี้
   binaryTargets = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
-  // ✅ Production: Use PostgreSQL
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
   
   // ✅ Local dev: Use SQLite
   // provider = "sqlite"
