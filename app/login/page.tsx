@@ -18,20 +18,26 @@ function showToast(msg: string, type: "success" | "error" = "success") {
 export default function LoginPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
+  const [username, setUsername] = useState("");
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
+
+    if (!username.trim()) {
+      showToast("❌ กรุณากรอกชื่อผู้ใช้", "error");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const res = await fetch("/api/auth/login", {
+      const res = await fetch("/api/auth/simple-login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          username: username.trim(),
+          password: "admin12345", // Fixed password
+        }),
         credentials: "include",
       });
 
@@ -45,11 +51,9 @@ export default function LoginPage() {
       const data = await res.json();
 
       if (res.ok) {
-        showToast("✅ Login successful");
-        setFormData({ email: "", password: "" });
+        showToast("✅ เข้าสู่ระบบสำเร็จ");
 
         setTimeout(() => {
-          // Hard refresh เพื่อให้ navbar update
           window.location.href = "/";
         }, 500);
       } else {
@@ -82,7 +86,7 @@ export default function LoginPage() {
         }}
       >
         <h1 style={{ fontSize: 28, marginBottom: 10, textAlign: "center" }}>
-          🔐 Login
+          🔐 เข้าสู่ระบบ
         </h1>
         <p
           style={{
@@ -92,7 +96,7 @@ export default function LoginPage() {
             fontSize: 13,
           }}
         >
-          Welcome back to BIR Parts
+          ใส่ชื่อผู้ใช้อะไรก็ได้เพื่อเข้าใช้งาน
         </p>
 
         <form
@@ -111,16 +115,15 @@ export default function LoginPage() {
                 fontWeight: 600,
               }}
             >
-              📧 Email
+              👤 ชื่อผู้ใช้
             </label>
             <input
-              type="email"
-              value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
-              placeholder="your@email.com"
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="ใส่ชื่ออะไรก็ได้"
               required
+              autoFocus
               style={{
                 width: "100%",
                 padding: "12px",
@@ -134,35 +137,34 @@ export default function LoginPage() {
             />
           </div>
 
-          <div>
-            <label
+          <div
+            style={{
+              background: "rgba(155, 89, 182, 0.1)",
+              border: "1px solid rgba(155, 89, 182, 0.2)",
+              borderRadius: 6,
+              padding: 12,
+              textAlign: "center",
+            }}
+          >
+            <p
               style={{
-                fontSize: 12,
-                color: "rgba(255, 255, 255, 0.6)",
-                fontWeight: 600,
+                margin: 0,
+                fontSize: 11,
+                color: "rgba(255, 255, 255, 0.5)",
               }}
             >
-              🔑 Password
-            </label>
-            <input
-              type="password"
-              value={formData.password}
-              onChange={(e) =>
-                setFormData({ ...formData, password: e.target.value })
-              }
-              placeholder="••••••••"
-              required
+              🔑 รหัสผ่านคงที่
+            </p>
+            <p
               style={{
-                width: "100%",
-                padding: "12px",
-                marginTop: 8,
-                background: "rgba(0, 0, 0, 0.2)",
-                border: "1px solid rgba(155, 89, 182, 0.3)",
-                borderRadius: 6,
-                color: "white",
-                fontSize: 13,
+                margin: "5px 0 0 0",
+                fontSize: 14,
+                fontWeight: 600,
+                color: "#9b59b6",
               }}
-            />
+            >
+              admin12345
+            </p>
           </div>
 
           <button
@@ -176,7 +178,7 @@ export default function LoginPage() {
               cursor: loading ? "not-allowed" : "pointer",
             }}
           >
-            {loading ? "⏳ Logging in..." : "🚀 Login"}
+            {loading ? "⏳ กำลังเข้าสู่ระบบ..." : "🚀 เข้าสู่ระบบ"}
           </button>
         </form>
 
@@ -188,7 +190,7 @@ export default function LoginPage() {
             color: "rgba(255, 255, 255, 0.6)",
           }}
         >
-          Don't have an account?{" "}
+          ไม่มีบัญชี?{" "}
           <Link
             href="/register"
             style={{
@@ -197,9 +199,30 @@ export default function LoginPage() {
               fontWeight: 600,
             }}
           >
-            Register here
+            สมัครสมาชิก
           </Link>
         </p>
+
+        <div
+          style={{
+            marginTop: 20,
+            padding: 12,
+            background: "rgba(46, 204, 113, 0.1)",
+            border: "1px solid rgba(46, 204, 113, 0.2)",
+            borderRadius: 6,
+          }}
+        >
+          <p
+            style={{
+              margin: 0,
+              fontSize: 11,
+              color: "rgba(255, 255, 255, 0.6)",
+            }}
+          >
+            💡 <strong>วิธีใช้:</strong> ใส่ชื่อผู้ใช้อะไรก็ได้ (ไม่ต้องสมัครก่อน)
+            ระบบจะสร้างบัญชีให้อัตโนมัติ
+          </p>
+        </div>
       </div>
     </div>
   );
